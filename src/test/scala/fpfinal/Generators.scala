@@ -26,7 +26,7 @@ trait Generators {
     arbitrary[String]
       .suchThat(s => Validations.double(s).isValid)
       .suchThat(s => Validations.allLetters(s).isValid)
-      .suchThat(s => Validations.maxLength(s, 32).isValid)    
+      .suchThat(s => Validations.maxLength(s, 32).isValid)
       .map(Person.unsafeCreate(_))
   }
 
@@ -40,7 +40,13 @@ trait Generators {
   implicit def expenseArb(implicit
       arbPerson: Arbitrary[Person],
       arbMoney: Arbitrary[Money]
-  ): Arbitrary[Expense] = ???
+  ): Arbitrary[Expense] = Arbitrary {
+    for {
+      person <- arbPerson.arbitrary
+      amount <- arbMoney.arbitrary
+      parties <- Gen.containerOf[List, Person](personArb.arbitrary)
+    } yield Expense.unsafeCreate(person, amount, parties)
+  }
 
   implicit val payeeDebtArb: Arbitrary[DebtByPayee] = Arbitrary {
     Gen
