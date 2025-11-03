@@ -90,5 +90,6 @@ object Money {
     * TODO #4: Implement and instance of Order for Money that compares its cents.
     * Use the given Order instance for comparing any Int values.
     */
-  implicit def orderMoney(implicit orderInt: Order[Int]): Order[Money] = ???
+  implicit def orderMoney(implicit orderInt: Order[Int]): Order[Money] = 
+    (xm, ym) => orderInt.compare(xm.cents, ym.cents)
 }

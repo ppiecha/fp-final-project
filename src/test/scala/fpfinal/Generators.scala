@@ -19,8 +19,8 @@ trait Generators {
 
   /** TODO #3a: implement an arbitrary of Person.
     *
-    * You can use Person.unsafeCreate as long as you take care of only producing
-    * valid values (check out the constraints in Person.create) .
+    * You can use Person.unsafeCreate as long as you take care of only producing valid values (check out the constraints
+    * in Person.create) .
     */
   implicit val personArb: Arbitrary[Person] = Arbitrary {
     arbitrary[String]
@@ -34,16 +34,16 @@ trait Generators {
     Gen.choose(1, 1e9.toInt).map(Money.unsafeCreate)
   }
 
-  /** TODO #3b: Use the provided arbitraries and the Expense.unsafeCreate method
-    * to create an instance of Arbitrary[Expense]
+  /** TODO #3b: Use the provided arbitraries and the Expense.unsafeCreate method to create an instance of
+    * Arbitrary[Expense]
     */
   implicit def expenseArb(implicit
       arbPerson: Arbitrary[Person],
       arbMoney: Arbitrary[Money]
   ): Arbitrary[Expense] = Arbitrary {
     for {
-      person <- arbPerson.arbitrary
-      amount <- arbMoney.arbitrary
+      person  <- arbPerson.arbitrary
+      amount  <- arbMoney.arbitrary
       parties <- Gen.containerOf[List, Person](personArb.arbitrary)
     } yield Expense.unsafeCreate(person, amount, parties)
   }
@@ -106,14 +106,18 @@ trait Generators {
 
   /** TODO #3c: implement an arbitrary of PersonOp[A].
     *
-    * One possible implementation is to create a State whose run function
-    * ignores the current state and just sets the state and value to random
-    * values.
+    * One possible implementation is to create a State whose run function ignores the current state and just sets the
+    * state and value to random values.
     */
   implicit def personOpArb[A](implicit
       arbA: Arbitrary[A],
       arbPersonState: Arbitrary[PersonState]
-  ): Arbitrary[PersonOp[A]] = ???
+  ): Arbitrary[PersonOp[A]] = Arbitrary {
+    for {
+      aa  <- arbA.arbitrary
+      aps <- arbPersonState.arbitrary
+    } yield State[PersonState, A](s => (aps, aa))
+  }
 
   implicit def isValidArb[A](implicit
       arbA: Arbitrary[A]
@@ -131,7 +135,7 @@ trait Generators {
   ): Arbitrary[ExpenseOp[A]] =
     Arbitrary {
       for {
-        a <- arbA.arbitrary
+        a  <- arbA.arbitrary
         es <- expenseStateArb.arbitrary
       } yield State((_: ExpenseState) => (es, a))
     }
