@@ -2,6 +2,7 @@ package fpfinal.model
 
 import cats._
 import cats.implicits._
+import cats.data._
 import fpfinal.app.Configuration.IsValid
 import fpfinal.common.Validations._
 import fpfinal.model.Money.showMoney
@@ -51,7 +52,7 @@ class Money private (_cents: Int) {
     * For simplicity we don't care about losing cents. For example, dividing 1 dollar
     * by 3 should yield 33 cents.
     */
-  def divideBy(n: Int): Option[Money] = ???
+  def divideBy(n: Int): Option[Money] = if (n == 0) None else Some(new Money(cents / n))
 
   /**
    * @return a string representation of this money amount in dollars, with two decimal places
@@ -77,7 +78,7 @@ object Money {
     * - Amount should be non-negative
     */
   def dollars(amount: Double): IsValid[Money] =
-    ???
+    Validated.condNec(amount > 0, unsafeCreate((amount * 100).round.toInt), "Amount less than 0")
 
   implicit val monoidMoney: Monoid[Money] = Monoid.instance(zero, _ plus _)
 
