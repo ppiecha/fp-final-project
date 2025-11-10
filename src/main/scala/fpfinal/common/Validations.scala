@@ -52,4 +52,8 @@ object Validations {
    */
   def allLetters(s: String): IsValid[String] =
     Validated.condNec(s.forall(_.isLetter), s, "String should be all letters")
+
+  def allNonEmptyStrings(strings: List[String]): IsValid[List[String]] =
+    Validated.condNec(strings.forall(nonEmptyString(_).isValid), strings, "Not all strings are non empty")
+
 }
