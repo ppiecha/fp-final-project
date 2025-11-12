@@ -41,7 +41,7 @@ object Person {
     Validations.nonEmptyString(name),
     Validations.allLetters(name),
     Validations.maxLength(name, 32)
-  ).mapN((s1, s2, s3) => unsafeCreate(s1))
+  ).mapN((_, _, _) => unsafeCreate(name))
 
   implicit val showPerson: Show[Person] = Show.show(_.name)
 

@@ -2,6 +2,7 @@ package fpfinal.app
 
 import cats._
 import cats.implicits._
+import cats.data._
 import fpfinal.app.Configuration.{AppOp, readEnv}
 import fpfinal.app.Syntax._
 
@@ -84,7 +85,14 @@ object App {
       *
       * The app should be able to continue normal execution afterwards.
       */
-    def executeCommandWithRecovery: AppOp[Boolean] = ???
+    def executeCommandWithRecovery: AppOp[Boolean] = {
+      ReaderT { 
+        env => //StateT[ErrorOr, AppState, Boolean]
+          StateT { appState => ??? //appState => EitherT[IO, Error, (AppState, Boolean)]
+
+          }
+      }
+    }
 
     ME.iterateUntil(executeCommandWithRecovery)(identity).void
   }

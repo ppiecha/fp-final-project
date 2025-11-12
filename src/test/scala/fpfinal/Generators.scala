@@ -23,11 +23,10 @@ trait Generators {
     * in Person.create) .
     */
   implicit val personArb: Arbitrary[Person] = Arbitrary {
-    arbitrary[String]
-      .suchThat(s => Validations.double(s).isValid)
-      .suchThat(s => Validations.allLetters(s).isValid)
-      .suchThat(s => Validations.maxLength(s, 32).isValid)
-      .map(Person.unsafeCreate(_))
+    for {
+      n <- Gen.choose(1, 32)
+      name <- Gen.stringOfN(n, Gen.alphaChar)
+    } yield Person.unsafeCreate(name)
   }
 
   implicit val moneyArb: Arbitrary[Money] = Arbitrary {
@@ -44,7 +43,7 @@ trait Generators {
     for {
       person  <- arbPerson.arbitrary
       amount  <- arbMoney.arbitrary
-      parties <- Gen.containerOf[List, Person](personArb.arbitrary)
+      parties <- Gen.nonEmptyListOf(arbPerson.arbitrary)
     } yield Expense.unsafeCreate(person, amount, parties)
   }
 
@@ -116,7 +115,7 @@ trait Generators {
     for {
       aa  <- arbA.arbitrary
       aps <- arbPersonState.arbitrary
-    } yield State[PersonState, A](s => (aps, aa))
+    } yield State[PersonState, A](_ => (aps, aa))
   }
 
   implicit def isValidArb[A](implicit

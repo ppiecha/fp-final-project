@@ -78,7 +78,7 @@ object Money {
     * - Amount should be non-negative
     */
   def dollars(amount: Double): IsValid[Money] =
-    Validated.condNec(amount > 0, unsafeCreate((amount * 100).round.toInt), "Amount less than 0")
+    Validated.condNec(amount > 0, unsafeCreate((amount * 100).toInt), "Amount less than 0")
 
   implicit val monoidMoney: Monoid[Money] = Monoid.instance(zero, _ plus _)
 

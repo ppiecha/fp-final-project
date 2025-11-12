@@ -38,7 +38,7 @@ class Expense private (
     * For simplicity we don't care about losing cents. For example, dividing 1 dollar among 3 participants should yield
     * 33 cents of debt for each participant.
     */
-  def amountByParticipant: Money = amount.divideBy(participants.size.toInt).get
+  def amountByParticipant: Money = amount.divideBy(participants.length + 1).get
 }
 
 object Expense {
@@ -67,11 +67,11 @@ object Expense {
       payer: Person,
       amount: Money,
       participants: List[Person]
-  )(implicit eqPerson: Eq[Person]): IsValid[Expense] = Validated.condNec(
-    participants.nonEmpty && participants.forall(p => eqPerson.neqv(p, payer)),
-    unsafeCreate(payer, amount, participants),
-    "Invalid expense"
-  )
+  )(implicit eqPerson: Eq[Person]): IsValid[Expense] = 
+    (
+      nonEmptySet(participants), 
+      Validated.condNec(participants.forall(p => eqPerson.neqv(p, payer)), payer, "Invalid expense")
+    ).mapN((participants, payer) => new Expense(payer, amount, participants))
 
   /** TODO #9: Implement an Eq instance by comparing every field, using the corresponding Eq instance for each type
     * (i.e.: Person, Money, NonEmptySet[Person]).
