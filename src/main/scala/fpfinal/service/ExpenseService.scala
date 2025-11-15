@@ -75,6 +75,7 @@ trait LiveExpenseService extends ExpenseService {
     /** Computes the debt for all the people involved, based on the expenses there are in the state.
       */
     override def computeDebt(): ExpenseOp[DebtByPayer] =
-      State(es => (es, Monoid[DebtByPayer].combineAll(es.expenses.map(DebtByPayer.fromExpense(_)))))
+      // State(es => (es, Monoid[DebtByPayer].combineAll(es.expenses.map(DebtByPayer.fromExpense(_)))))
+      State.inspect(_.expenses.foldMap(DebtByPayer.fromExpense).simplified)
   }
 }

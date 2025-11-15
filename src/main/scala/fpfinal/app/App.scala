@@ -86,11 +86,11 @@ object App {
       * The app should be able to continue normal execution afterwards.
       */
     def executeCommandWithRecovery: AppOp[Boolean] = {
-      ReaderT { 
-        env => //StateT[ErrorOr, AppState, Boolean]
-          StateT { appState => ??? //appState => EitherT[IO, Error, (AppState, Boolean)]
-
-          }
+      ME.handleErrorWith(executeCommand){ s =>
+        for {
+          env           <- readEnv
+          _             <- env.console.printLine(s).toAppOp
+        } yield false
       }
     }
 

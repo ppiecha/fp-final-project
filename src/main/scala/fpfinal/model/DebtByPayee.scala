@@ -57,7 +57,7 @@ object DebtByPayee {
     */
   implicit def eqDebtByPayee(implicit
       eqMap: Eq[Map[Person, Money]]
-  ): Eq[DebtByPayee] = Eq.by(_.debtByPayee)
+  ): Eq[DebtByPayee] = Eq.instance((d1, d2) => d1 eqv d2)
 
   /** TODO #16: Implement a monoid instance.
     *

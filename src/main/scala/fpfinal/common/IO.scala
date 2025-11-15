@@ -55,7 +55,7 @@ object IO {
          */
         eh match {
           case Some(eh) => resume(eh(e), None)
-          case None => Left(() => (RaiseError(e), None))
+          case None => throw e
         }
       case HandleErrorWith(ioa, newEh) => resume(ioa.asInstanceOf[IO[A]], Some(newEh.asInstanceOf[ErrorHandler[A]]))
       case FlatMap(t, f) =>

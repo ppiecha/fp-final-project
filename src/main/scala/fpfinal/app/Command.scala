@@ -83,22 +83,13 @@ object AddExpenseCommand extends Command {
       * Extra points: implement it using ME.tailRecM
       */
     def readParticipants(): AppOp[List[String]] = {
-      def readFromConsole(): StateT[ErrorOr, AppState, List[String]] = {
-        val s = StdIn.readLine()
-        if (s == "END")
-          StateT(appState => (appState, appState.personState.personByName.keys.toList).pure[Configuration.ErrorOr])
-        else {
-          StateT.modifyF[ErrorOr, AppState] { appState =>
-            Person.create(s) match {
-              case Invalid(nec) => EitherT.leftT(nec.toList.mkString(","))
-              case Valid(p)     => EitherT.rightT(appState.copy(personState = appState.personState.addPerson(p)))
-            }
-          }
-          readFromConsole()
-        }
+      val msg = "Enter name of participant (END to finish)"
+      ME.tailRecM(List[String]()) { xs: List[String] =>
+        for {
+          env         <- readEnv
+          participant <- env.console.readLine(msg).toAppOp
+        } yield if (participant == "END") Right(xs) else Left(participant :: xs)
       }
-      val st: StateT[ErrorOr, AppState, List[String]] = readFromConsole()
-      ReaderT.liftF(st)
     }
 
     /** TODO #27: Use the helper functions in common.Validations and return a validated instance of AddExpenseData. The
@@ -111,7 +102,7 @@ object AddExpenseCommand extends Command {
         payer: String,
         amount: String,
         participants: List[String]
-    ): IsValid[AddExpenseData] = 
+    ): IsValid[AddExpenseData] =
       (nonEmptyString(payer), double(amount), allNonEmptyStrings(participants)).mapN(AddExpenseData.apply)
 
     def readData(): AppOp[AddExpenseData] = {
@@ -132,9 +123,12 @@ object AddExpenseCommand extends Command {
       * Hint: Use ME.fromOption
       */
     def findPerson(name: String): ReaderT[St, Environment, Person] = {
-      ReaderT{ env => 
-        StateT{ appState => 
-          EitherT.fromOption[IO](env.personService.findByName(name).runA(appState.personState).value.map(p => (appState, p)), s"Person $name not found") 
+      ReaderT { env =>
+        StateT { appState =>
+          EitherT.fromOption[IO](
+            env.personService.findByName(name).runA(appState.personState).value.map(p => (appState, p)),
+            s"Person not found"
+          )
         }
       }
     }
